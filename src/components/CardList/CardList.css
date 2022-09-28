@@ -1,0 +1,7 @@
+.section {
+    min-width: 300px;
+    /* background-color: grey; */
+    border: 1px solid grey;
+    border-radius: 15px;
+    padding: 1rem;
+}
