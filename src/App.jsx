@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { DragDropContext } from 'react-beautiful-dnd';
 import CardList from './components/CardList/CardList';
 
@@ -6,118 +6,72 @@ import './App.css';
 
 const App = () => {
 
-  // const initialList = [
-  //   [
-  //     {
-  //       id: '1',
-  //       title: 'Task number 1',
-  //       description: 'Description for task number 1'
-  //     },
-  //     {
-  //       id: '2',
-  //       title: 'Task number 2',
-  //       description: 'Description for task number 2'
-  //     },
-  //     {
-  //       id: '3',
-  //       title: 'Task number 3',
-  //       description: 'Description for task number 3'
-  //     },
-  //     {
-  //       id: '4',
-  //       title: 'Task number 4',
-  //       description: 'Description for task number 4'
-  //     }
-  //   ],
-  //   [
-  //     {
-  //       id: '5',
-  //       title: 'Task number 5',
-  //       description: 'Description for task number 5'
-  //     },
-  //     {
-  //       id: '6',
-  //       title: 'Task number 6',
-  //       description: 'Description for task number 6'
-  //     },
-  //     {
-  //       id: '7',
-  //       title: 'Task number 7',
-  //       description: 'Description for task number 7'
-  //     },
-  //     {
-  //       id: '8',
-  //       title: 'Task number 8',
-  //       description: 'Description for task number 8'
-  //     }
-  //   ],
-  //   [
-  //     {
-  //       id: '9',
-  //       title: 'Task number 9',
-  //       description: 'Description for task number 9'
-  //     },
-  //     {
-  //       id: '10',
-  //       title: 'Task number 10',
-  //       description: 'Description for task number 10'
-  //     },
-  //     {
-  //       id: '11',
-  //       title: 'Task number 11',
-  //       description: 'Description for task number 11'
-  //     },
-  //     {
-  //       id: '12',
-  //       title: 'Task number 12',
-  //       description: 'Description for task number 12'
-  //     }
-  //   ]
-  // ]
-
-  const initialList = [];
+  const [finalList, setFinalList] = useState(JSON.parse(localStorage.getItem('list')) || []);
 
   const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-
-  const [todoList, updateTodoList] = useState([[]]);
+  const [card, setCard] = useState({name: '', desc: ''});
 
   const handleDragEnd = (result) => {
     if (!result.destination) return;
-    const tmpList = Array.from(todoList);
-    const elementToInsert = tmpList[result.source.droppableId].splice(result.source.index, 1);
-    tmpList[result.destination.droppableId].splice(result.destination.index, 0, ...elementToInsert);
-    updateTodoList(tmpList)
+    const tmpList = Array.from(finalList);
+    const elementToInsert = tmpList[result.source.droppableId].tasks.splice(result.source.index, 1);
+    tmpList[result.destination.droppableId].tasks.splice(result.destination.index, 0, ...elementToInsert);
+    setFinalList(tmpList);
+    localStorage.setItem('list', JSON.stringify(tmpList))
   }
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (title.length === 0 || description.length === 0) {
-      alert("Missing element, please fill all the fields")
+  const handleChange = (e) => {
+    setTitle(e.target.value)
+  }
+
+  const handleCard = (e) => {
+    setCard({...card, [e.target.name]: e.target.value})
+  }
+
+  const handleSubmitCard = (e, index) => {
+    e.preventDefault()
+    if (card) {
+      finalList[index].tasks.push({name: card.name, desc: card.desc})
+      localStorage.setItem('list', JSON.stringify(finalList))
+      setCard({name: '', desc: ''})
     } else {
-      const tmp = {title: title, description: description}
-      todoList[0].splice(1, 0, tmp);
-      setTitle("")
-      setDescription("")
+      alert("Impossible")
+    }
+  }
+
+  const handleAddColumn = (e) => {
+    e.preventDefault()
+    if (title) {
+      finalList.push({title: title, tasks: []})
+      localStorage.setItem('list', JSON.stringify(finalList))
+      setTitle('');
+    } else {
+      alert("Name required")
     }
   }
 
   return (
     <div className="App">
-      <div>
-        <form onSubmit={handleSubmit}>
-          <label>Title: <input type="text" value={title} onChange={(e) => setTitle(e.target.value)}/></label><br/>
-          <label>Description: <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Enter a description ..."></textarea></label>
-          <input type="submit" value="OK" />
-        </form>
-      </div>
-
+      <h1>My Todo</h1>
+      <form onSubmit={handleAddColumn}>
+        <input type="text" name="add-column" id="" placeholder='Enter a name' value={title} onChange={handleChange}/>
+        <input type="submit" value="Add" />
+      </form>
       <DragDropContext onDragEnd={(result) => handleDragEnd(result)}>
         <div className='board'>
         {
-          todoList.map((section, index) => {
+          finalList.map((section, index) => {
             return (
-              <CardList section={section} index={index} key={index} />
+              <div key={index}>
+                <h2>{section.title}</h2>
+                <form onSubmit={(e) => handleSubmitCard(e, index)}>
+                  <input type="text" name="name" id="" value={card.name} placeholder='Enter a title' onChange={handleCard} />
+                  <br />
+                  <textarea name="desc" id="" value={card.desc} placeholder='Enter a description' onChange={handleCard} cols="35" rows="5"></textarea>
+                  <input type="submit" value="Add" />
+                </form>
+                <CardList section={section.tasks} index={index} />
+              </div>
             )
           })
         }

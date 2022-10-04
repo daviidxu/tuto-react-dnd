@@ -12,11 +12,12 @@ const CardList = ({section, index}) => {
           <div
             ref={provided.innerRef}
             className='section'
+            // style={{ backgroundColor: snapshot.isDraggingOver ? 'blue' : 'black' }}
             {...provided.droppableProps}>
             {
               section.map((card, index) => {
                 return (
-                  <Card index={index} key={index} {...card} />
+                  <Card {...card} index={index} key={index}/>
                 )
               })
             }

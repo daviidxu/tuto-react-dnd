@@ -2,9 +2,9 @@ import React from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import "./Card.css";
 
-const Card = ({title, description, index}) => {
+const Card = ({name, desc, index}) => {
   return (
-    <Draggable draggableId={`draggable-${title+index}`} index={index}>
+    <Draggable draggableId={`draggable-${index}`} index={index}>
       {(provided) => {
         return (
           <div
@@ -12,8 +12,8 @@ const Card = ({title, description, index}) => {
             className='task'
             {...provided.dragHandleProps}
             {...provided.draggableProps}>
-            <h2>{title}</h2>
-            <p>{description}</p>
+            <h2>{name}</h2>
+            <p>{desc}</p>
             {provided.placeholder}
           </div>
         )
